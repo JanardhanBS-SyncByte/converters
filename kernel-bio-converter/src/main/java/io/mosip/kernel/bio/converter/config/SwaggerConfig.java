@@ -9,18 +9,26 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 
 /**
  * Configuration class for Swagger/OpenAPI documentation generation.
  * <p>
- * This class defines beans to configure the OpenAPI specification based on the
- * provided {@link OpenApiProperties}. It initializes an {@link OpenAPI} bean
- * and a {@link GroupedOpenApi} bean to customize and group API documentation
- * according to specified properties.
+ * Builds the Springdoc {@link OpenAPI} bean from {@link OpenApiProperties} and
+ * registers an Authorization apiKey so Swagger UI shows the Authorize button
+ * (same pattern as kernel-auth-service).
+ * </p>
  */
 @Configuration
 public class SwaggerConfig {
+
+	/**
+	 * Scheme name shown by Swagger UI as Authorize (IDA-style Authorization apiKey).
+	 */
+	public static final String AUTHORIZATION_SCHEME = "Authorization";
+
 	private OpenApiProperties openApiProperties;
 
 	/**
@@ -37,14 +45,16 @@ public class SwaggerConfig {
 
 	/**
 	 * Creates an {@link OpenAPI} bean configured with title, version, description,
-	 * and license information.
+	 * license, servers, and Authorize apiKey.
 	 *
 	 * @return Configured {@link OpenAPI} instance representing the OpenAPI
 	 *         specification
 	 */
 	@Bean
 	public OpenAPI openApi() {
-		OpenAPI api = new OpenAPI().components(new Components())
+		OpenAPI api = new OpenAPI()
+				.components(new Components().addSecuritySchemes(AUTHORIZATION_SCHEME, authorizationApiKey()))
+				.addSecurityItem(new SecurityRequirement().addList(AUTHORIZATION_SCHEME))
 				.info(new Info().title(openApiProperties.getInfo().getTitle())
 						.version(openApiProperties.getInfo().getVersion())
 						.description(openApiProperties.getInfo().getDescription())
@@ -54,6 +64,18 @@ public class SwaggerConfig {
 		openApiProperties.getService().getServers().forEach(
 				server -> api.addServersItem(new Server().description(server.getDescription()).url(server.getUrl())));
 		return api;
+	}
+
+	/**
+	 * Header apiKey named {@code Authorization}, so Swagger UI shows Authorize with
+	 * Name/In/Value (paste {@code Bearer <token>} or the raw token as used by the
+	 * gateway/adapter).
+	 *
+	 * @return the security scheme
+	 */
+	private static SecurityScheme authorizationApiKey() {
+		return new SecurityScheme().type(SecurityScheme.Type.APIKEY).in(SecurityScheme.In.HEADER)
+				.name(AUTHORIZATION_SCHEME);
 	}
 
 	/**

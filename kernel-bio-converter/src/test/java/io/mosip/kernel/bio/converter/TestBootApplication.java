@@ -8,7 +8,7 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableAsync;
 
-import io.mosip.kernel.bio.testsupport.TestSecurityConfig;
+import io.mosip.kernel.bio.converter.config.TestSecurityConfig;
 
 /**
  * Main Spring Boot application class for testing purposes.

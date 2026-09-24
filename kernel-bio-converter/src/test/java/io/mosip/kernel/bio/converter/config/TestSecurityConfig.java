@@ -1,4 +1,4 @@
-package io.mosip.kernel.bio.testsupport;
+package io.mosip.kernel.bio.converter.config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,8 +28,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 
 /**
- * Test-only security wiring. Lives outside {@code io.mosip.kernel.bio.converter}
- * so production {@code @ComponentScan} does not pick it up.
+ * Test-only security wiring for converter integration tests.
  */
 @Configuration
 @EnableWebSecurity
