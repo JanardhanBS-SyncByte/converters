@@ -77,24 +77,26 @@
 		<sonar.coverage.exclusions>**/dto/**,**/constant/**,**/config/**,**/httpfilter/**,**/cache/**,**/entity/**,**/model/**,**/exception/**,**/repository/**,**/request/**,**/spi/**,**/proxy/**,**/KernelBioConverterApplication.java</sonar.coverage.exclusions>
 		<sonar.cpd.exclusions>**/dto/**,**/entity/**,**/config/**</sonar.cpd.exclusions>
 
-		<!-- ── MOSIP (external — no kernel-bom) ─────────────────────────────── -->
-		<!-- commons/kernel + bio-utils must be installed locally for these SNAPSHOTs. -->
-		<kernel.core.version>1.4.1-SNAPSHOT</kernel.core.version>
-		<kernel.auth.adapter.version>1.4.1-SNAPSHOT</kernel.auth.adapter.version>
-		<mosip.biometrics.util.version>1.4.1-SNAPSHOT</mosip.biometrics.util.version>
-
+		
 		<!-- ── Third-party (latest checked against Maven Central, 2026-09-24) ─ -->
 		<imgscalr.lib.version>4.2</imgscalr.lib.version>
 		<jai.imageio.jpeg2000.version>1.4.0</jai.imageio.jpeg2000.version>
 		<github.mhshams.jnbis.version>2.1.2</github.mhshams.jnbis.version>
 		<!-- Jackson 2.x (Boot 4 default is Jackson 3; MOSIP/kernel need Jackson 2) -->
+		<!-- Do NOT name this jackson-bom.version — Boot parent uses that for tools.jackson (Jackson 3). -->
 		<!-- annotations uses major.minor only (JSTEP-1); core/databind use patch -->
-		<jackson-bom.version>2.22.3</jackson-bom.version>
+		<jackson2.bom.version>2.22.3</jackson2.bom.version>
 		<jackson-annotations.version>2.22</jackson-annotations.version>
 		<jackson-core.version>2.22.3</jackson-core.version>
 		<jackson-databind.version>2.22.3</jackson-databind.version>
 		<!-- JaCoCo gate (instruction coverage on non-excluded packages) -->
 		<jacoco.coverage.ratio>0.95</jacoco.coverage.ratio>
+
+		<!-- ── MOSIP (external — no kernel-bom) ─────────────────────────────── -->
+		<!-- commons/kernel + bio-utils must be installed locally for these SNAPSHOTs. -->
+		<kernel.core.version>1.4.1-SNAPSHOT</kernel.core.version>
+		<kernel.auth.adapter.version>1.4.1-SNAPSHOT</kernel.auth.adapter.version>
+		<mosip.biometrics.util.version>1.4.1-SNAPSHOT</mosip.biometrics.util.version>
 	</properties>
 
 	<dependencyManagement>
@@ -104,6 +106,15 @@
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
 				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- Jackson 2.22.x BOM — overrides Boot-managed Jackson 2 patches for MOSIP -->
+			<dependency>
+				<groupId>com.fasterxml.jackson</groupId>
+				<artifactId>jackson-bom</artifactId>
+				<version>${jackson2.bom.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -426,8 +437,8 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>pl.project13.maven</groupId>
-				<artifactId>git-commit-id-plugin</artifactId>
+				<groupId>io.github.git-commit-id</groupId>
+				<artifactId>git-commit-id-maven-plugin</artifactId>
 				<version>${git.commit.id.plugin.version}</version>
 				<executions>
 					<execution>
