@@ -5,10 +5,10 @@ ARG SOURCE
 ARG COMMIT_HASH
 ARG COMMIT_ID
 ARG BUILD_TIME
-LABEL source=${SOURCE} \
-      commit_hash=${COMMIT_HASH} \
-      commit_id=${COMMIT_ID} \
-      build_time=${BUILD_TIME}
+LABEL source=${SOURCE}
+LABEL commit_hash=${COMMIT_HASH}
+LABEL commit_id=${COMMIT_ID}
+LABEL build_time=${BUILD_TIME}
 
 # Can be passed during Docker build as build-time environment for github branch to pick up configuration from.
 ARG spring_config_label=master

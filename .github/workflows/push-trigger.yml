@@ -28,6 +28,8 @@ jobs:
     with:
       SERVICE_LOCATION: kernel-bio-converter
       BUILD_ARTIFACT: kernel-bio-converter
+      # Boot 4 ZIP layout JARs are not +x; kattu only zips -executable unless listed here.
+      MAVEN_NON_EXEC_ARTIFACTS: kernel-bio-converter
     secrets:
       OSSRH_USER: ${{ secrets.OSSRH_USER }}
       OSSRH_SECRET: ${{ secrets.OSSRH_SECRET }}
