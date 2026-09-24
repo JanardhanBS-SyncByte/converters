@@ -1,5 +1,6 @@
 FROM mosipid/openjdk-21-jre:21.0.4
-# label to be assigned along with  Docker build [Mandatory]
+
+# Labels assigned at Docker build time [Mandatory]
 ARG SOURCE
 ARG COMMIT_HASH
 ARG COMMIT_ID
@@ -9,81 +10,89 @@ LABEL commit_hash=${COMMIT_HASH}
 LABEL commit_id=${COMMIT_ID}
 LABEL build_time=${BUILD_TIME}
 
-# can be passed during Docker build as build time environment for github branch to pickup configuration from.
-ARG spring_config_label
+# Can be passed during Docker build as build-time environment for github branch to pick up configuration from.
+ARG spring_config_label=master
 
-# can be passed during Docker build as build time environment for spring profiles active
-ARG active_profile
+# Can be passed during Docker build as build-time environment for spring profiles active.
+ARG active_profile=default
 
-# can be passed during Docker build as build time environment for config server URL
+# Can be passed during Docker build as build-time environment for config server URL.
 ARG spring_config_url
 
-# can be passed during Docker build as build time environment for glowroot
-ARG is_glowroot
-
-# can be passed during Docker build as build time environment for artifactory URL
-ARG artifactory_url
-
-# environment variable to pass active profile such as DEV, QA etc at docker runtime
-ENV active_profile_env=${active_profile}
-
-# environment variable to pass github branch to pickup configuration from, at docker runtime
-ENV spring_config_label_env=${spring_config_label}
-
-# environment variable to pass spring configuration url, at docker runtime
-ENV spring_config_url_env=${spring_config_url}
-
-# environment variable to pass glowroot, at docker runtime
-ENV is_glowroot_env=${is_glowroot}
-
-# environment variable to pass artifactory url, at docker runtime
-ENV artifactory_url_env=${artifactory_url}
-
-# environment variable to pass iam_adapter url, at docker runtime
-ENV iam_adapter_url_env=${iam_adapter_url}
-
-# can be passed during Docker build as build time environment for github branch to pickup configuration from.
+# Can be passed during Docker build as build-time environment for container user.
 ARG container_user=mosip
 
-# can be passed during Docker build as build time environment for github branch to pickup configuration from.
+# Can be passed during Docker build as build-time environment for container user group.
 ARG container_user_group=mosip
 
-# can be passed during Docker build as build time environment for github branch to pickup configuration from.
+# Can be passed during Docker build as build-time environment for container user uid.
 ARG container_user_uid=1001
 
-# can be passed during Docker build as build time environment for github branch to pickup configuration from.
+# Can be passed during Docker build as build-time environment for container user gid.
 ARG container_user_gid=1001
 
-# set working directory for the user
-WORKDIR /home/${container_user}
-ENV work_dir=/home/${container_user}
-ARG loader_path=${work_dir}/additional_jars/
-ENV loader_path_env=${loader_path}
-ARG logging_level_root=INFO
-ENV logging_level_root_env=${logging_level_root}
+# Environment variable to pass active profile such as DEV, QA etc at docker runtime.
+# Environment variable to pass github branch to pick up configuration from, at docker runtime.
+# Environment variable to pass spring configuration url, at docker runtime.
+# Working directory for the container user.
+# Extra jars path (loader.path) under the user home.
+ENV active_profile_env=${active_profile} \
+    spring_config_label_env=${spring_config_label} \
+    spring_config_url_env=${spring_config_url} \
+    work_dir=/home/${container_user} \
+    loader_path_env=/home/${container_user}/additional_jars/
 
-# set working directory for the user
-WORKDIR /home/${container_user}
-ENV work_dir=/home/${container_user}
-ARG loader_path=${work_dir}/additional_jars/
-ENV loader_path_env=${loader_path}
-ARG logging_level_root=INFO
-ENV logging_level_root_env=${logging_level_root}
+# Set working directory for the user
+WORKDIR ${work_dir}
 
-# install packages and create user
+# Install packages and create user
 RUN apt-get update && \
     apt-get install -y --no-install-recommends sudo && \
     groupadd -g ${container_user_gid} ${container_user_group} && \
     useradd -u ${container_user_uid} -g ${container_user_group} -s /bin/bash -m ${container_user} && \
-    mkdir -p /home/${container_user} ${loader_path}
-ENV loader_path_env=${loader_path}
-COPY ./target/kernel-bio-converter-*.jar kernel-bio-converter.jar
+    mkdir -p ${work_dir}/additional_jars && \
+    rm -rf /var/lib/apt/lists/*
 
-# change permissions of file inside working dir
-RUN chown -R ${container_user}:${container_user} /home/${container_user}
+# Copy module jars into work dir (keep original names: fat, -lib, -sources, -javadoc may be present).
+# Destination must end with / so Docker does not rename a single match to kernel-bio-converter.jar.
+COPY ./target/kernel-bio-converter-*.jar ${work_dir}/
 
-# select container user for all tasks
+# Prefer Boot fat JAR only; drop -lib / -sources / -javadoc / .original.
+# Change permissions of files inside working dir.
+RUN set -eux; \
+    cd ${work_dir}; \
+    rm -f kernel-bio-converter-*-lib.jar \
+          kernel-bio-converter-*-sources.jar \
+          kernel-bio-converter-*-javadoc.jar \
+          kernel-bio-converter-*.jar.original \
+          kernel-bio-converter.jar.original 2>/dev/null || true; \
+    fat=""; \
+    for f in kernel-bio-converter-*.jar; do \
+      [ -f "$f" ] || continue; \
+      case "$f" in \
+        *-lib.jar|*-sources.jar|*-javadoc.jar) rm -f "$f" ;; \
+        *) fat="$f" ;; \
+      esac; \
+    done; \
+    if [ -z "$fat" ] || [ ! -f "$fat" ]; then \
+      echo "error: Boot fat jar not found under ${work_dir}" >&2; \
+      ls -la "${work_dir}" >&2; \
+      exit 1; \
+    fi; \
+    mv -f "$fat" kernel-bio-converter.jar; \
+    chown -R ${container_user}:${container_user} ${work_dir}
+
+# Select container user for all tasks
 USER ${container_user_uid}:${container_user_gid}
+
 EXPOSE 8079
 
-CMD java -XX:-UseG1GC -XX:-UseParallelGC -XX:-UseShenandoahGC -XX:+ExplicitGCInvokesConcurrent -XX:+UseZGC -XX:+ZGenerational -XX:+UnlockExperimentalVMOptions -XX:+UseStringDeduplication -XX:+HeapDumpOnOutOfMemoryError -XX:+UseCompressedOops -XX:MaxGCPauseMillis=200 -Dfile.encoding=UTF-8 -Dloader.path="${loader_path_env}" -Dspring.cloud.config.label="${spring_config_label_env}" -Dspring.profiles.active="${active_profile_env}" -Dspring.cloud.config.uri="${spring_config_url_env}"  --add-modules=ALL-SYSTEM --add-opens java.xml/jdk.xml.internal=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang.stream=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.time.LocalDate=ALL-UNNAMED --add-opens java.base/java.time.LocalDateTime=ALL-UNNAMED --add-opens java.base/java.time.LocalDateTime.date=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect.DirectMethodHandleAccessor=ALL-UNNAMED  -jar kernel-bio-converter.jar
+# JVM GC / --add-opens flags: use run-local.bat / run-local.sh for local IDE runs.
+# Cluster may inject JDK_JAVA_OPTIONS via Helm. Keep this CMD short.
+# Shell form so ${..._env} expands at container start.
+CMD java -Dfile.encoding=UTF-8 \
+    -Dloader.path="${loader_path_env}" \
+    -Dspring.cloud.config.label="${spring_config_label_env}" \
+    -Dspring.profiles.active="${active_profile_env}" \
+    -Dspring.cloud.config.uri="${spring_config_url_env}" \
+    -jar kernel-bio-converter.jar
