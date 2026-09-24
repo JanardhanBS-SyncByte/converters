@@ -82,7 +82,7 @@ Apache-2.0 (licenses/Apache-2.0.txt)
 - org.hibernate.orm:hibernate-core 7.x (Apache-2.0 since 7.0; transitive via kernel-core)
 - Maven build plugins (compiler 3.16.0, surefire 3.6.0, jar 3.5.1, source 3.4.0,
   javadoc 3.12.0, gpg 3.2.8, deploy 3.2.0, jacoco 0.8.15,
-  git-commit-id-maven-plugin 9.0.2, central-publishing 0.11.0, sonar 5.8.0.7211)
+  git-commit-id-plugin 4.9.10 (pl.project13.maven), central-publishing 0.11.0, sonar 5.8.0.7211)
 
 ===========================
 BSD-3-Clause / BSD-3-Clause-No-Nuclear (licenses/BSD-3-Clause-No-Nuclear-License.txt)
