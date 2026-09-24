@@ -3,10 +3,10 @@ package io.mosip.kernel.bio.converter.dto;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import lombok.Data;
 import lombok.ToString;
@@ -77,10 +77,22 @@ public class ConvertRequestDto {
 	@SuppressWarnings({ "java:S1104" })
 	public Map<String, String> targetParameters;
 
+	/**
+	 * No-arg constructor for Jackson / Spring binding.
+	 */
 	public ConvertRequestDto() {
 		super();
 	}
 
+	/**
+	 * Full constructor for programmatic request creation.
+	 *
+	 * @param values            modality key → Base64 URL-encoded ISO blob
+	 * @param sourceFormat      source format code (e.g. {@code ISO19794_4_2011})
+	 * @param targetFormat      target format code (e.g. {@code IMAGE/JPEG})
+	 * @param sourceParameters  optional source hints
+	 * @param targetParameters  optional target hints
+	 */
 	public ConvertRequestDto(
 			@NotNull(message = "Values code can not be null") @Size(min = 1, message = "Minimum one entry required") Map<String, String> values,
 			@NotNull(message = "SourceFormat code can not be null") @NotBlank(message = "SourceFormat code can not be blank") @NotEmpty(message = "SourceFormat code can not be empty") String sourceFormat,
@@ -94,6 +106,9 @@ public class ConvertRequestDto {
 		this.targetParameters = targetParameters;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
@@ -107,11 +122,20 @@ public class ConvertRequestDto {
 				&& Objects.equals(targetParameters, that.targetParameters);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public int hashCode() {
 		return Objects.hash(values, sourceFormat, targetFormat, sourceParameters, targetParameters);
 	}
 
+	/**
+	 * Lombok-style equality helper used by generated {@code equals} patterns.
+	 *
+	 * @param other candidate object
+	 * @return {@code true} if {@code other} is a {@link ConvertRequestDto}
+	 */
 	public boolean canEqual(Object other) {
 		return other instanceof ConvertRequestDto;
 	}

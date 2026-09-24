@@ -30,15 +30,32 @@ import io.mosip.kernel.bio.converter.exception.ConversionException;
 import io.mosip.kernel.bio.converter.service.IConverterApi;
 
 /**
- * This class implements handling conversion of ISO format to JPEG or PNG Image
- * format
- * 
+ * Service implementation that converts ISO/IEC 19794 biometric records
+ * (finger, face, iris) into JPEG/PNG image bytes (URL-safe Base64), or
+ * re-wraps into supported ISO target formats via {@code biometrics-util}.
+ *
+ * <p>
+ * Entry point: {@link #convert(Map, String, String, Map, Map)}. Per-modality
+ * helpers decode Base64, parse the BDIR, decompress JP2000/WSQ, and re-encode.
+ * </p>
+ *
  * @author Janardhan B S
  * @since 1.0.0
- * 
  */
 @Service
 public class ConverterServiceImpl implements IConverterApi {
+	/**
+	 * Converts each Base64 URL-encoded ISO blob in {@code values} from
+	 * {@code sourceFormat} to {@code targetFormat}.
+	 *
+	 * @param values            identifier → Base64 URL-encoded ISO BDB
+	 * @param sourceFormat      e.g. {@code ISO19794_4_2011}
+	 * @param targetFormat      e.g. {@code IMAGE/JPEG}
+	 * @param sourceParameters  optional source hints (unused / ignored if unknown)
+	 * @param targetParameters  optional target hints (unused / ignored if unknown)
+	 * @return map of the same keys → Base64 URL-encoded converted payloads
+	 * @throws ConversionException when input is empty, formats are invalid, or decode fails
+	 */
 	@Override
 	public Map<String, String> convert(Map<String, String> values, String sourceFormat, String targetFormat,
 			Map<String, String> sourceParameters, Map<String, String> targetParameters) throws ConversionException {
@@ -80,6 +97,17 @@ public class ConverterServiceImpl implements IConverterApi {
 		return targetValues;
 	}
 
+	/**
+	 * Decodes a finger ISO19794-4 payload and re-encodes the embedded image to
+	 * {@code targetCode} (JPEG or PNG).
+	 *
+	 * @param sourceCode       resolved source format enum
+	 * @param isoData          Base64 URL-encoded finger ISO blob
+	 * @param targetCode       resolved target image format
+	 * @param targetParameters optional target parameters (currently unused)
+	 * @return Base64 URL-encoded image bytes
+	 * @throws ConversionException on Base64, ISO structure, or compression failures
+	 */
 	@SuppressWarnings({ "java:S1172", "java:S6208" })
 	public String convertFingerIsoToImageType(SourceFormatCode sourceCode, String isoData, TargetFormatCode targetCode,
 			Map<String, String> targetParameters) throws ConversionException {
@@ -114,6 +142,14 @@ public class ConverterServiceImpl implements IConverterApi {
 	    return CommonUtil.encodeToURLSafeBase64(outImageData);
 	}
 
+	/**
+	 * Decompresses finger image bytes for the given ISO compression type.
+	 *
+	 * @param imageData        raw image payload from the finger BDIR
+	 * @param compressionType  {@link FingerImageCompressionType} constant
+	 * @return decoded {@link BufferedImage}
+	 * @throws ConversionException if compression is unsupported or bytes cannot be read
+	 */
 	public BufferedImage decodeFingerImage(byte[] imageData, int compressionType) throws ConversionException {
 	    try {
 	        switch (compressionType) {
@@ -134,6 +170,16 @@ public class ConverterServiceImpl implements IConverterApi {
 	    }
 	}
 
+	/**
+	 * Decodes a face ISO19794-5 payload and re-encodes to {@code targetCode}.
+	 *
+	 * @param sourceCode       resolved source format enum
+	 * @param isoData          Base64 URL-encoded face ISO blob
+	 * @param targetCode       resolved target image format
+	 * @param targetParameters optional target parameters (currently unused)
+	 * @return Base64 URL-encoded image bytes
+	 * @throws ConversionException on Base64, ISO structure, or compression failures
+	 */
 	@SuppressWarnings({ "java:S1172" })
 	public String convertFaceIsoToImageType(SourceFormatCode sourceCode, String isoData, TargetFormatCode targetCode,
 			Map<String, String> targetParameters) throws ConversionException {
@@ -167,6 +213,14 @@ public class ConverterServiceImpl implements IConverterApi {
 	    return CommonUtil.encodeToURLSafeBase64(outImageData);
 	}
 
+	/**
+	 * Decompresses face image bytes (JPEG2000 lossy/lossless only).
+	 *
+	 * @param imageData     raw image payload from the face BDIR
+	 * @param imageDataType {@link ImageDataType} constant
+	 * @return decoded {@link BufferedImage}
+	 * @throws ConversionException if type is unsupported or bytes cannot be read
+	 */
 	public BufferedImage decodeFaceImage(byte[] imageData, int imageDataType) throws ConversionException {
 	    try {
 	        if (imageDataType == ImageDataType.JPEG2000_LOSSY || imageDataType == ImageDataType.JPEG2000_LOSS_LESS) {
@@ -181,6 +235,16 @@ public class ConverterServiceImpl implements IConverterApi {
 	    }
 	}
 	
+	/**
+	 * Decodes an iris ISO19794-6 payload and re-encodes to {@code targetCode}.
+	 *
+	 * @param sourceCode       resolved source format enum
+	 * @param isoData          Base64 URL-encoded iris ISO blob
+	 * @param targetCode       resolved target image format
+	 * @param targetParameters optional target parameters (currently unused)
+	 * @return Base64 URL-encoded image bytes
+	 * @throws ConversionException on Base64, ISO structure, or compression failures
+	 */
 	@SuppressWarnings({ "java:S1172" })
 	public String convertIrisIsoToImageType(SourceFormatCode sourceCode, String isoData, TargetFormatCode targetCode,
 			Map<String, String> targetParameters) throws ConversionException {
@@ -214,6 +278,14 @@ public class ConverterServiceImpl implements IConverterApi {
 	    return CommonUtil.encodeToURLSafeBase64(outImageData);
 	}
 
+	/**
+	 * Decompresses iris image bytes ({@link ImageFormat#MONO_JPEG2000} only).
+	 *
+	 * @param imageData   raw image payload from the iris BDIR
+	 * @param imageFormat {@link ImageFormat} constant
+	 * @return decoded {@link BufferedImage}
+	 * @throws ConversionException if format is unsupported or bytes cannot be read
+	 */
 	public BufferedImage decodeIrisImage(byte[] imageData, int imageFormat) throws ConversionException {
 	    try {
 	        if (imageFormat == ImageFormat.MONO_JPEG2000) {
@@ -228,6 +300,14 @@ public class ConverterServiceImpl implements IConverterApi {
 	    }
 	}
 	
+	/**
+	 * Encodes a {@link BufferedImage} to JPEG or PNG bytes for the given target.
+	 *
+	 * @param targetCode image target enum ({@code IMAGE_JPEG} or {@code IMAGE_PNG})
+	 * @param outImage   decoded biometric image
+	 * @return encoded image bytes
+	 * @throws ConversionException if {@code targetCode} is not a plain image format
+	 */
 	public byte[] convertBufferedImageToBytes(TargetFormatCode targetCode, BufferedImage outImage) {
 		switch (targetCode) {
 		case IMAGE_JPEG:

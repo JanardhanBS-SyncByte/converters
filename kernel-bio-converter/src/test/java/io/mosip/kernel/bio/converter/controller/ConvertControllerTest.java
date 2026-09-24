@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -90,7 +90,7 @@ public class ConvertControllerTest {
 				.checkResponse(
 						mockMvc.perform(post("/convert").contentType(MediaType.APPLICATION_JSON)
 								.content(mapper.writeValueAsString(convertRequestDto))).andReturn(),
-						500, null, "MOS-CNV-500");
+						500, null, "MOS-CNV-001");
 	}
 
 	/**
@@ -111,7 +111,7 @@ public class ConvertControllerTest {
 				.checkResponse(
 						mockMvc.perform(post("/convert").contentType(MediaType.APPLICATION_JSON)
 								.content(mapper.writeValueAsString(convertRequestDto))).andReturn(),
-						500, null, "MOS-CNV-500");
+						500, null, "MOS-CNV-002");
 	}
 
 	/**
