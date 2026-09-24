@@ -1,76 +1,126 @@
-MOSIP Project – Notices
-Copyright © 2022 
-Modular Open Source Identity Platform (MOSIP)
+NOTICES
 
-This project contains third-party software components distributed under
-various open-source licenses. Attribution and license information for
-each included component is provided below. Full license texts are
-available in the LICENSES/ directory or from each component’s official
-source repository.
+Copyright (c) MOSIP.
+All rights reserved.
 
----
+This project is licensed under MPL 2.0 (see LICENSE). Third-party
+versions below match kernel-bio-converter/pom.xml (checked against
+Maven Central on 2026-09-24). Full license texts: licenses/.
 
-Third-party attributions:
+MOSIP open-source license matrix (compatible with MPL 2.0 / Use with MOSIP):
 
-• Spring Boot, Spring Security & Spring Cloud  
-  (spring-boot-starter-web, spring-boot-starter-security,  
-   configuration-processor, spring-security-core/web/config/test,  
-   spring-cloud-starter-config, spring-boot-maven-plugin)  
-  Licensed under the Apache License 2.0.
+  License                          Compatible?   Use with MOSIP?   Comments
+  -------------------------------  ------------  ----------------  --------
+  BSD (2-Clause, 3-Clause)         Yes           Yes               Combine freely
+  MIT                              Yes           Yes               Combine freely
+  Apache-2.0                       Yes           Yes               Meet attribution
+  MPL-2.0                          Yes           Yes               Combine freely
+  ISC                              Yes           Yes               Keep ISC notice + attribution
+  EPL                              No            No                Incompatible with MPL
+  LGPLv3                           Yes           No                May apply to combined work
+  GPLv2                            No            No                No explicit MPL compatibility
+  GPLv3                            Yes           No                Combined work must be GPLv3
+  AGPLv3                           Yes           No                Combined work must be AGPLv3
+  Creative Commons (software)      No            No                Not designed for software
+  Python-2.0                       Yes           Yes               Keep both license notices
+  AFL-2.0                          No            No                Conflicts with MPL 2.0
+  AFL-2.1                          Yes           Yes               Keep AFL notice + attribution
+  ODC-By-1.0                       No            No                Database license
+  CDDL-1.0                         Yes           Yes               Files retain CDDL; document split
+  Unicode-DFS-2016                 Yes           Yes               Keep Unicode notice
+  BlueOak-1.0.0                    Yes           Yes               Keep license text/link
+  OFL-1.1                          Yes           Yes               Fonts; include OFL text
+  Zlib                             Yes           Yes               Include zlib license text
+  0BSD                             Yes           Yes               Permissive
+  EDL-1.0                          Yes           Yes               BSD-like (Jakarta Persistence)
 
-• SpringDoc OpenAPI  
-  (springdoc-openapi-starter-webmvc-ui)  
-  Licensed under the Apache License 2.0.
+Dual-licensed jars: MOSIP elects an allowed option (never EPL, GPL, AGPL, or
+LGPLv3 as the product license). Where only EPL OR GPL-2.0+CPE is offered
+(Jakarta Servlet / Transaction APIs), those are platform/transitive deps —
+document here; do not relicense MOSIP code under them.
 
-• MOSIP Kernel Libraries  
-  (kernel-bom, kernel-core, kernel-auth-adapter, kernel-logger-logback)  
-  Licensed under the Mozilla Public License 2.0.
+Pinned platform (stable; not latest milestone):
+  Spring Boot parent ........ 4.1.1
+  Spring Cloud BOM .......... 2025.1.3
+  springdoc-openapi ......... 3.1.1
+  JDK ....................... 21
 
-• MOSIP Biometric Utilities  
-  (biometrics-util)  
-  Licensed under the Mozilla Public License 2.0.
+===========================
+MPL-2.0 (LICENSE / licenses/MPL-2.0.txt)
+===========================
 
-• Jackson XML Dataformat  
-  (jackson-dataformat-xml)  
-  Licensed under the Apache License 2.0.
+- This repository (io.mosip.kernel:kernel-bio-converter 1.4.1-SNAPSHOT)
+- io.mosip.kernel:kernel-core 1.4.1-SNAPSHOT
+- io.mosip.kernel:kernel-auth-adapter 1.4.1-SNAPSHOT
+- io.mosip.biometric.util:biometrics-util 1.4.1-SNAPSHOT
 
-• Jakarta Servlet API  
-  Licensed under the Eclipse Public License 2.0.
+===========================
+MIT License (licenses/MIT.txt)
+===========================
 
-• Vert.x Core  
-  (vertx-core)  
-  Licensed under the Apache License 2.0.
+- org.projectlombok:lombok (Boot-managed)
+- org.slf4j:slf4j-api (Boot-managed / transitive)
 
-• JAI ImageIO – JPEG 2000  
-  (jai-imageio-jpeg2000)  
-  Licensed under the BSD 3-Clause No-Nuclear License.
+===========================
+Apache-2.0 (licenses/Apache-2.0.txt)
+===========================
 
-• Imgscalr  
-  (imgscalr-lib)  
-  Licensed under the Apache License 2.0.
+- Spring Boot 4.1.1 / Spring Framework / Spring Security / Spring Cloud 2025.1.3
+- org.springdoc:springdoc-openapi-starter-webmvc-ui 3.1.1
+- com.fasterxml.jackson:jackson-bom 2.22.3 (property `jackson2.bom.version`; not Boot's `jackson-bom.version`)
+- com.fasterxml.jackson.core:jackson-annotations 2.22
+- com.fasterxml.jackson.core:jackson-core 2.22.3
+- com.fasterxml.jackson.core:jackson-databind 2.22.3
+- com.fasterxml.jackson.dataformat:jackson-dataformat-xml / yaml (via jackson-bom 2.22.3)
+- com.fasterxml.jackson.module:jackson-module-afterburner (via jackson-bom 2.22.3)
+- org.springframework.boot:spring-boot-jackson2 (Jackson 2 ObjectMapper bridge)
+- com.github.mhshams:jnbis 2.1.2
+- org.imgscalr:imgscalr-lib 4.2
+- ch.qos.logback:logback-classic / logback-core (Boot-managed)
+- org.apache.tomcat.embed:* (Boot-managed)
+- com.zaxxer:HikariCP (Boot-managed / transitive)
+- org.hibernate.orm:hibernate-core 7.x (Apache-2.0 since 7.0; transitive via kernel-core)
+- Maven build plugins (compiler 3.16.0, surefire 3.6.0, jar 3.5.1, source 3.4.0,
+  javadoc 3.12.0, gpg 3.2.8, deploy 3.2.0, jacoco 0.8.15,
+  git-commit-id-maven-plugin 9.0.2, central-publishing 0.11.0, sonar 5.8.0.7211)
 
-• Lombok  
-  (org.projectlombok:lombok)  
-  Licensed under the MIT License.
+===========================
+BSD-3-Clause / BSD-3-Clause-No-Nuclear (licenses/BSD-3-Clause-No-Nuclear-License.txt)
+===========================
 
-• JUnit Vintage Engine  
-  Licensed under the Eclipse Public License 2.0.
+- com.github.jai-imageio:jai-imageio-jpeg2000 1.4.0
+- org.hamcrest:hamcrest (test scope)
 
-• Apache Maven Build Plugins  
-  (maven-compiler-plugin, maven-surefire-plugin,  
-   maven-gpg-plugin, maven-javadoc-plugin, maven-source-plugin)  
-  Licensed under the Apache License 2.0.
+===========================
+EDL-1.0 (licenses/EDL-1.0.txt) — elect this side of dual EPL/EDL
+===========================
 
-• Central Publishing Maven Plugin  
-  Licensed under the Apache License 2.0.
+- jakarta.persistence:jakarta.persistence-api (Boot / kernel-core transitive)
 
-• Git Commit ID Maven Plugin  
-  Licensed under the GNU Lesser General Public License 3.0.
+===========================
+EPL-2.0 (+ optional GPL-2.0 with Classpath exception) — platform / test only
+(licenses/EPL-2.0.txt)
+===========================
 
----
+MOSIP matrix: EPL and GPLv2 are not approved product licenses. These jars are
+transitive / test-only from Boot and Jakarta EE; MOSIP code remains MPL-2.0.
 
-Additional open-source components may be included and are licensed under
-their respective compatible open-source licenses. For complete legal
-terms for each dependency, see the LICENSES/ directory or the original
-source repository.
+- jakarta.servlet:jakarta.servlet-api (EPL-2.0 OR GPL-2.0+CPE) — Boot web
+- jakarta.transaction:jakarta.transaction-api (EPL-2.0 OR GPL-2.0+CPE) — transitive
+- org.aspectj:aspectjweaver (EPL-2.0) — transitive via kernel-core JPA stack
+- org.junit.* (EPL-2.0) — test scope only
 
+===========================
+Artifacts produced by this module
+===========================
+
+- kernel-bio-converter-${version}.jar
+    Fat / runnable Spring Boot service (ZIP layout). Use run-local.bat /
+    run-local.sh or `java -jar` with config-server env vars.
+
+- kernel-bio-converter-${version}-lib.jar
+    Embeddable library classifier: constant/, dto/, exception/, service/**
+    only. Maven: <classifier>lib</classifier>.
+
+- kernel-bio-converter-${version}-sources.jar / -javadoc.jar
+    Source and API documentation attachments for Maven Central.

@@ -20,6 +20,7 @@ on:
       - develop*
       - MOSIP*
       - release*
+      - issue*
 
 jobs:
   build-maven-kernel-bio-converter:
