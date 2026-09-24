@@ -53,19 +53,33 @@ RUN apt-get update && \
     mkdir -p ${work_dir}/additional_jars && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy Boot fat JAR (glob may also match -lib / -sources / -javadoc)
-COPY ./target/kernel-bio-converter-*.jar ${work_dir}/kernel-bio-converter.jar
+# Copy module jars into work dir (keep original names: fat, -lib, -sources, -javadoc may be present).
+# Destination must end with / so Docker does not rename a single match to kernel-bio-converter.jar.
+COPY ./target/kernel-bio-converter-*.jar ${work_dir}/
 
-# Prefer fat JAR only (exclude -lib / -sources / -javadoc if COPY matched multiple)
-# Change permissions of files inside working dir
+# Prefer Boot fat JAR only; drop -lib / -sources / -javadoc / .original.
+# Change permissions of files inside working dir.
 RUN set -eux; \
     cd ${work_dir}; \
+    rm -f kernel-bio-converter-*-lib.jar \
+          kernel-bio-converter-*-sources.jar \
+          kernel-bio-converter-*-javadoc.jar \
+          kernel-bio-converter-*.jar.original \
+          kernel-bio-converter.jar.original 2>/dev/null || true; \
+    fat=""; \
     for f in kernel-bio-converter-*.jar; do \
+      [ -f "$f" ] || continue; \
       case "$f" in \
         *-lib.jar|*-sources.jar|*-javadoc.jar) rm -f "$f" ;; \
-        *) mv -f "$f" kernel-bio-converter.jar ;; \
+        *) fat="$f" ;; \
       esac; \
     done; \
+    if [ -z "$fat" ] || [ ! -f "$fat" ]; then \
+      echo "error: Boot fat jar not found under ${work_dir}" >&2; \
+      ls -la "${work_dir}" >&2; \
+      exit 1; \
+    fi; \
+    mv -f "$fat" kernel-bio-converter.jar; \
     chown -R ${container_user}:${container_user} ${work_dir}
 
 # Select container user for all tasks
